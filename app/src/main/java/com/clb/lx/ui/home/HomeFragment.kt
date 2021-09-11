@@ -4,42 +4,43 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import com.clb.lx.R
+import com.clb.lx.adapter.HomeMenuAdapter
 import com.clb.lx.databinding.FragmentHomeBinding
+import com.clb.lx.dtos.HomeMenuDto
+import com.clb.lx.ui.base.BaseFragment
 
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
-    private lateinit var homeViewModel: HomeViewModel
-    private var _binding: FragmentHomeBinding? = null
+    private lateinit var homeMenuAdapter: HomeMenuAdapter
+    private lateinit var viewModel: HomeViewModel
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    override val layoutId: Int
+        get() = R.layout.fragment_home
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-        return root
+    override fun initViewModel(view: View, savedInstanceState: Bundle?) {
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+    }
+    override fun initView(view: View, savedInstanceState: Bundle?) {
+        binding.menuList.also {
+            it.layoutManager = GridLayoutManager(context,2)
+            homeMenuAdapter = HomeMenuAdapter()
+            it.adapter = homeMenuAdapter
+        }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun initData(view: View, savedInstanceState: Bundle?) {
+        viewModel.homeMenuList.observe(this){
+            homeMenuAdapter.addAll(it,true)
+        }
     }
+
+    override fun initClick(view: View, savedInstanceState: Bundle?) {
+        
+    }
+
 }
